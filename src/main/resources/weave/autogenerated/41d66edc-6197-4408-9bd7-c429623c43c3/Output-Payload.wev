@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_41d66edc_6197_4408_9bd7_c429623c43c3_Output_Payload = Array<{  Emp_id: Number,   Tax_deduct: String,   Emp_package: String,   Emp_join_date: String,   Emp_mobile: String,   current_org_experience: String,   Emp_grade: String,   Emp_role: String,   Emp_mail: String,   Emp_last_name: String,   Emp_first_name: String,   Emp_department: String,   _?: Any}>
+

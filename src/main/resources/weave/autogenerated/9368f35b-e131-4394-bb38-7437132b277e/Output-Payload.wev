@@ -1,0 +1,15 @@
+%dw 2.0
+
+type auto_9368f35b_e131_4394_bb38_7437132b277e_Output_Payload = {
+  Emp_id: Number, 
+  Emp_package: String, 
+  Emp_join_date: String, 
+  Emp_mobile: String, 
+  Emp_role: String, 
+  Emp_mail: String, 
+  Emp_last_name: String, 
+  Emp_first_name: String, 
+  Emp_department: String, 
+  _?: Any
+}
+

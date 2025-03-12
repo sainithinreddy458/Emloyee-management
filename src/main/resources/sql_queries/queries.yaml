@@ -1,0 +1,12 @@
+Insert:
+  query: "INSERT INTO `I52_employees`(`Emp_id`, `Emp_first_name`, `Emp_last_name`, `Emp_role`, `Emp_department`, `Emp_mobile`, `Emp_mail`, `Emp_package`, `Tax_deduct`, `Emp_join_date`, `current_org_experience`, `Emp_grade`, `Tax_deduct_percentage`)
+         VALUES(:Emp_id,:Emp_first_name,:Emp_last_name,:Emp_role,:Emp_department,:Emp_mobile,:Emp_mail,:Emp_package,:Tax_deduct,:Emp_join_date,:current_org_experience,:Emp_grade,:Tax_deduct_percentage)"
+         
+Select:
+  query: "SELECT * FROM I52_employees"
+
+SelectById:
+  query: "SELECT * FROM I52_employees WHERE Emp_id = :id"
+  
+Delete:
+  query: "DELETE FROM I52_employees WHERE Emp_id = :id"

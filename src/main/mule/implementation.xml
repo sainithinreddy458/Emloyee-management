@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<sub-flow name="get-by-id-implementationSub_Flow" doc:id="9368f35b-e131-4394-bb38-7437132b277e" >
+		<logger level="INFO" doc:name="Logger" doc:id="1ebc2d1d-c6a1-42cb-b468-2d5bc1f8a9a9" />
+		<choice doc:name="Choice" doc:id="cbc8a420-6f4e-4840-b976-899ea1b42945">
+			<when expression="#[attributes.uriParams.id &gt;= 0 and attributes.uriParams.id &lt;= 9]">
+				<http:request method="GET" doc:name="Request" doc:id="608c3685-718a-4903-bc05-e2d217f2e569" config-ref="HTTP_Request_configuration" path="${request.path}" responseTimeout="${request.responsetimeout}">
+			<http:headers><![CDATA[#[{
+	"query": p('SelectById.query'),
+	"id":attributes.uriParams.id
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[{
+	"id":attributes.uriParams.id
+}]]]></http:uri-params>
+		</http:request>
+			</when>
+			<otherwise>
+				<raise-error doc:name="Raise error" doc:id="4384afa9-7bf2-43b3-8e58-a3bd93e221d9" type="VALIDATION:NOT_FOUND" description='"Resource Not Found"' />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="44995b36-3ad6-46af-bda9-ba50d2ee757f" />
+	</sub-flow>
+	<sub-flow name="get-implementationSub_Flow" doc:id="41d66edc-6197-4408-9bd7-c429623c43c3" >
+		<logger level="INFO" doc:name="Logger" doc:id="8dfaedc8-efb0-4259-9f12-145834a9359d" />
+		<set-variable value='#[attributes.headers."Content-Type"]' doc:name="Set Variable" doc:id="968f23d1-b9a9-4e43-90f2-9b5b5e8604dd" variableName="content-type"/>
+		<http:request method="GET" doc:name="Request" doc:id="81c9b35e-a837-4708-b89f-25cea8b93b84" config-ref="HTTP_Request_configuration" path="${request.path}" responseTimeout="${request.responsetimeout}">
+			<http:headers><![CDATA[#[output application/json
+---
+{
+	"query" : p('Select.query')
+}]]]></http:headers>
+		</http:request>
+		<choice doc:name="Choice" doc:id="347ebf40-ecea-48d5-b9e3-90a353cd9017" >
+			<when expression='#[vars."content-type" == "application/json"]'>
+				<ee:transform doc:name="Transform Message" doc:id="e109ee2e-cd00-4a25-b8b5-4b09a1af98df" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="5f9c40f6-0dd4-49fb-a5e8-f1b9acb6e476" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  employees: {
+    employee: payload map (emp) -> {
+      
+		"Emp_id":emp.Emp_id,
+		"Emp_first_name":emp.Emp_first_name,
+		"Emp_last_name":emp.Emp_last_name,
+		"Emp_role":emp.Emp_role,
+		"Emp_department":emp.Emp_department,
+		"Emp_mobile":emp.Emp_mobile,
+		"Emp_mail":emp.Emp_mail,
+		"Emp_package":emp.Emp_package,
+		"Tax_deduct":emp.Tax_deduct,
+		"Tax_deduct_percentage":emp.Tax_deduct_percentage,
+		"Emp_join_date":emp.Emp_join_date,
+		"current_org_experience":emp.current_org_experience,
+		"Emp_grade":emp.Emp_grade
+    }
+  }
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="23d7a975-daca-469c-aff3-aa53e23cb179" />
+	</sub-flow>
+	<sub-flow name="post-implementationSub_Flow" doc:id="b9159088-90e8-4dd4-88b9-21a222e962a6" >
+		<logger level="INFO" doc:name="post implementation start logger" doc:id="2afc8e6c-d79d-4c34-8dea-cf2d369d19d7" message="post implementation start logger"/>
+		<ee:transform doc:name="Transform Message" doc:id="a6ab019f-60be-4648-b74a-931b00df6911" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var currentDate = now() as Date
+
+// Extract year and month
+var currentYear = currentDate.year
+var joinYear = payload.Emp_join_date.year
+var years = currentYear - joinYear
+
+var currentMonth = currentDate.month
+var joinMonth = payload.Emp_join_date.month
+var months = currentMonth - joinMonth
+
+// Adjust for negative months
+var adjustedYears = if (months < 0) years - 1 else years
+var adjustedMonths = if (months < 0) 12 + months else months
+var experience = adjustedYears ++ " years, " ++ adjustedMonths ++ " months"
+
+// Assigning grade based on experience
+var grade = 
+    if (adjustedYears >= 15) "A"
+    else if (adjustedYears >= 11) "A1"
+    else if (adjustedYears >= 7) "A2"
+    else if (adjustedYears >= 4) "B1"
+    else "B2"
+
+// Employee salary package (assumed in LPA)
+var empPackage = splitBy(payload.Emp_package," ")[0] as Number // Example: 11 LPA
+
+// Tax deduction based on package slabs
+var taxPercentage = 
+    if (empPackage >= 20) "30%"
+    else if (empPackage >= 15) "25%"
+    else if (empPackage >= 10) "20%"
+    else if (empPackage >= 5) "15%"
+    else "10%"
+
+// Calculating tax amount in LPA
+var taxDeducted = ((empPackage * (taxPercentage replace "%" with "" )as Number) / 100) as String
+
+---
+{
+		"Emp_id":payload.Emp_id,
+		"Emp_first_name":payload.Emp_first_name,
+		"Emp_last_name":payload.Emp_last_name,
+		"Emp_role":payload.Emp_role,
+		"Emp_department":payload.Emp_department,
+		"Emp_mobile":payload.Emp_mobile,
+		"Emp_mail":payload.Emp_mail,
+		"Emp_package":payload.Emp_package,
+		"Tax_deduct":taxDeducted,
+		"Tax_deduct_percentage":taxPercentage,
+		"Emp_join_date":payload.Emp_join_date,
+		"current_org_experience":experience,
+		"Emp_grade":grade
+	}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="7d1f1675-016d-4c33-a50b-0292cedc05a7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+		"query": p('Insert.query'),
+		"body": payload
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="238b1249-3de7-4520-8bf1-9fbad294bba1" config-ref="HTTP_Request_configuration" responseTimeout="${request.responsetimeout}" path="${request.path}"/>
+		<ee:transform doc:name="Transform Message" doc:id="94180116-3892-4cea-9e39-e0d3c8323a35" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Posted Successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="post implementation End logger" doc:id="10cebd9d-dda5-4872-8446-52f54312ba5a" message="post implementation End logger"/>
+	</sub-flow>
+	<sub-flow name="delete-implementationSub_Flow" doc:id="3aaf4fd6-c0cb-407b-9a3d-5349060a0a8e" >
+		<logger level="INFO" doc:name="Logger" doc:id="376a4460-cf7e-439a-84b4-13345d64c3d1" />
+		<http:request method="DELETE" doc:name="Request" doc:id="2107c37d-e4c1-4983-819d-2c597f43fb72" config-ref="HTTP_Request_configuration" path="${request.path}" responseTimeout="${request.responsetimeout}">
+			<http:headers ><![CDATA[#[{
+	"query": p('Delete.query'),
+	"id": attributes.uriParams.id
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="54fe3c46-4177-47bb-a8c2-7b9fd60fa493" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Deleted Successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2c3332c6-4415-4f07-b477-07eb9ea28c62" />
+	</sub-flow>
+</mule>
