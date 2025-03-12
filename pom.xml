@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>0af5f823-519a-41eb-8e00-acd99b8114e7</groupId>
 			<artifactId>employee-p-api</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 			<classifier>raml</classifier>
 			<type>zip</type>
 		</dependency>

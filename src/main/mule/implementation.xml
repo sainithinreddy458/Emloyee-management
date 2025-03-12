@@ -11,6 +11,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		<logger level="INFO" doc:name="Logger" doc:id="1ebc2d1d-c6a1-42cb-b468-2d5bc1f8a9a9" />
 		<choice doc:name="Choice" doc:id="cbc8a420-6f4e-4840-b976-899ea1b42945">
 			<when expression="#[attributes.uriParams.id &gt;= 0 and attributes.uriParams.id &lt;= 9]">
+				<set-variable value='#[attributes.headers."Content-Type"]' doc:name="content-type" doc:id="7bfa0300-6bb2-4d4b-acd2-d0ceba5d1376" variableName="content-type"/>
 				<http:request method="GET" doc:name="Request" doc:id="608c3685-718a-4903-bc05-e2d217f2e569" config-ref="HTTP_Request_configuration" path="${request.path}" responseTimeout="${request.responsetimeout}">
 			<http:headers><![CDATA[#[{
 	"query": p('SelectById.query'),
@@ -20,6 +21,30 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 	"id":attributes.uriParams.id
 }]]]></http:uri-params>
 		</http:request>
+				<choice doc:name="Choice" doc:id="c5eaa37b-8066-4ceb-9559-d3c2efbfad8f" >
+					<when expression='vars."content-type" == "application/json"'>
+						<ee:transform doc:name="Transform Message" doc:id="c11064ac-b8dd-466e-9ac4-31362f28052b" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="31dcca92-60ff-48bc-8acb-45af6bcce59a" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	"employee":payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</otherwise>
+				</choice>
 			</when>
 			<otherwise>
 				<raise-error doc:name="Raise error" doc:id="4384afa9-7bf2-43b3-8e58-a3bd93e221d9" type="VALIDATION:NOT_FOUND" description='"Resource Not Found"' />
@@ -163,7 +188,7 @@ output application/json
 output application/json
 ---
 {
-	"message":"Posted Successfully"
+	"message":"Created Successfully"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
